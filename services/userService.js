@@ -1,9 +1,9 @@
-const User = require('../models/User');
+const User = require("../models/User");
+const UserVerify = require("../models/UserVerify");
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
 const { transporter } = require('../config/email');
-const { createOrUpdateUser, getUserByEmail, verifyAccountByUserId } = require('../repositories/userRepository');
 
 // const saveUser = async (req) => {
 //     //check email existance
@@ -21,12 +21,24 @@ const { createOrUpdateUser, getUserByEmail, verifyAccountByUserId } = require('.
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
  */
+const getUserByEmail = async (req) => {
+    const user = await User.findOne({
+      where: { email: req.body.email },
+      include: [
+        {
+          model: UserVerify,
+          as: "userVerify",
+        },
+      ],
+    });
+    return user;
+  };
 const randomNumber = (min, max) => {
     return Math.floor(
         Math.random() * (max - min) + min
     )
 }
-const saveUser = async (req) => {
+const signUp = async (req) => {
     //check email existance
     const emailAlreadyExist = await getUserByEmail(req);
     if (emailAlreadyExist){
@@ -36,7 +48,19 @@ const saveUser = async (req) => {
     req.body.password = await bcrypt.hash(req.body.password, 10);
     const token = randomNumber(100000, 999999);
     // req.body.profile_pic = req.file.filename
-    const user = await createOrUpdateUser(req, token)
+    const { firstName, lastName, email, password, role } = req.body;
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password,
+      role,
+    });
+    const userVerify = await UserVerify.create({
+      userId: user.id,
+      emailVerificationToken: token,
+      isEmailVerified: false,
+    });
     // var mailOptions = {
     //     from: 'rabbimahmud95@gmail.com',
     //     to: 'rabbyasaduzzaman@gmail.com',
@@ -89,4 +113,4 @@ const verifyUserEmail = async ( req ) => {
     }
 }
 
-module.exports = { saveUser, signIn, verifyUserEmail }
+module.exports = { signUp, signIn, verifyUserEmail }

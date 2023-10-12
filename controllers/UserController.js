@@ -1,7 +1,7 @@
 
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { saveUser, signIn, verifyUserEmail } = require('../services/userService');
+const { signUp, signIn, verifyUserEmail } = require('../services/userService');
 const { attachCookiesToResponse, createTokenUser } = require('../utils');
 
 const register = async (req, res) => {
