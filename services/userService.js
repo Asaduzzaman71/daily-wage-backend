@@ -120,13 +120,29 @@ const verifyUserEmail = async ( req ) => {
         }
     }
 }
-const list = async () => {
+const allUsers = async () => {
     try {
         const users = await User.findAll();
-        return { status: 200, message: 'categories found', data: users }
+        return { status: 200, message: 'Users found', data: users }
     } catch (error) {
         return error
     }
 };
+const allUserslogs = async (req) => {
+  const page = req.query.page || 1; // Current page
+  const perPage = 10; // Number of items per page
+  const offset = (page - 1) * perPage;
+  const limit = perPage;
+  try {
+    const userLogs = await UserActivity.findAll({
+      limit,
+      offset,
+    });
+    console.log('userLogs',userLogs)
+    return { status: 200, message: 'Activity logs found', data: userLogs }
+  } catch (error) {
+    return error
+  }
+}
 
-module.exports = { signUp, signIn, verifyUserEmail, list }
+module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs }

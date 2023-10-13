@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateUser, authorizePermissions } = require('../middleware/authentication');
 const {
-    getAllUsers
+    getAllUsers,
+    getAllUsersLogs
 } = require('../controllers/UserController');
 
-router.route('/').get(getAllUsers);
+router.get('/', authenticateUser, getAllUsers);
+router.get('/activity-logs', authenticateUser, getAllUsersLogs);
 module.exports = router

@@ -10,7 +10,7 @@ const sequelize = require('./config/database');
 
 //internal imports
 
-const authRouter = require('./routes/userRoute');
+const authRouter = require('./routes/authRoute');
 const userRouter = require('./routes/userRoute');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorMiddleware = require('./middleware/error-handler');
@@ -19,11 +19,9 @@ const { authenticateUser, authorizePermissions } = require('./middleware/authent
 
 // Add this line to parse JSON request bodies
 app.use(express.json());
-app.use(cookieParser(process.env.JWT_SECRET));
-
 //all api routes
 app.use('/api/auth', authRouter);
-app.use('/api/users', authenticateUser, userRouter);
+app.use('/api/users', userRouter);
 
 // middleware
 app.use(notFoundMiddleware);
