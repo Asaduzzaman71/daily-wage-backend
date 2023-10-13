@@ -1,8 +1,9 @@
 'use strict';
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('user_verifies', {
+  async up (queryInterface, Sequelize) {
+      await queryInterface.createTable('user_activities', {
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -19,13 +20,13 @@ module.exports = {
           },
           allowNull: false
         },
-        emailVerificationToken: {
+        ipAddress: {
           allowNull: false,
           type: Sequelize.STRING
         },
-        isEmailVerified: {
+        userAgent: {
           defaultValue: false,
-          type: Sequelize.BOOLEAN
+          type: Sequelize.TEXT
         },
         createdAt: {
           allowNull: false,
@@ -36,9 +37,9 @@ module.exports = {
           type: Sequelize.DATE,
         }
     });
-    
   },
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_verifies');
+
+  async down (queryInterface, Sequelize) {
+    await queryInterface.dropTable('user_activities');
   }
 };
