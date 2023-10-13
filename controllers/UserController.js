@@ -2,16 +2,14 @@
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const { signUp, signIn, verifyUserEmail } = require('../services/userService');
-const { attachCookiesToResponse, createTokenUser } = require('../utils');
+const { createJwtToken, createTokenUser } = require('../utils');
 
 const register = async (req, res) => {
-    let result = await saveUser(req);
+    let result = await signUp(req);
     if(result.status == 400){
         throw new CustomError.BadRequestError(result.message);
     }
-    const tokenUser = createTokenUser(result.data);
-    attachCookiesToResponse({ res, user: tokenUser });
-    res.status(StatusCodes.CREATED).json({ user: result.data });
+    res.status(StatusCodes.CREATED).json({ message:'Registration successful', user: result.data });
 };
 
 const login = async (req, res) => {
@@ -22,8 +20,8 @@ const login = async (req, res) => {
         throw new CustomError.UnauthenticatedError( result.message );
     }else{
         const tokenUser = createTokenUser( result.data );
-        attachCookiesToResponse({ res, user: tokenUser });
-        res.status(StatusCodes.OK).json({ user: tokenUser });
+        const token = createJwtToken({ user: tokenUser });
+        res.status(StatusCodes.OK).json({ message:'Login successful', access_token: token });
     }
 };
 const logout = async (req, res) => {

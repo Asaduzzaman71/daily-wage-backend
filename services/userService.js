@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const UserVerify = require("../models/UserVerify");
+const UserActivity = require("../models/UserActivity");
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
@@ -47,20 +48,22 @@ const signUp = async (req) => {
     //hashed password before save into db
     req.body.password = await bcrypt.hash(req.body.password, 10);
     const token = randomNumber(100000, 999999);
-    // req.body.profile_pic = req.file.filename
-    const { firstName, lastName, email, password, role } = req.body;
+    req.body.profilePic = req.file.filename
+    const { firstName, lastName, email, password, role, profilePic } = req.body;
     const user = await User.create({
       firstName,
       lastName,
       email,
       password,
       role,
+      profilePic
     });
     const userVerify = await UserVerify.create({
       userId: user.id,
       emailVerificationToken: token,
       isEmailVerified: false,
     });
+    
     // var mailOptions = {
     //     from: 'rabbimahmud95@gmail.com',
     //     to: 'rabbyasaduzzaman@gmail.com',
@@ -93,6 +96,11 @@ const signIn = async (req) => {
     if ( user.userVerify.isEmailVerified == false ) {
         return { status: 401, message: "Account verification pending" }
     }
+    const userActivity = await UserActivity.create({
+        userId: user.id,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+    });
     return { status: 200, data: user }
 };
 
