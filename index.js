@@ -24,7 +24,7 @@ app.use(cookieParser(process.env.JWT_SECRET));
 
 //all api routes
 app.use('/api/auth', authRouter);
-app.use('/api/categories', categoryRouter);
+app.use('/api/categories', authenticateUser, categoryRouter);
 
 // middleware
 app.use(notFoundMiddleware);
@@ -32,21 +32,6 @@ app.use(errorMiddleware);
 
 // Create an HTTP server using the Express app
 const server = http.createServer(app);
-
-// Set up your WebSocket (socket.io) logic here
-const io = socketIo(server);
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
-
-  socket.on('chat message', (message) => {
-    io.emit('chat message', message); // Broadcast the message to all connected clients
-  });
-});
-
 
 //get port number from env
 const port = process.env.PORT || 3000;
