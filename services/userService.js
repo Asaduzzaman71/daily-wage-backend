@@ -120,5 +120,13 @@ const verifyUserEmail = async ( req ) => {
         }
     }
 }
+const list = async () => {
+    try {
+        const users = await User.findAll();
+        return { status: 200, message: 'categories found', data: users }
+    } catch (error) {
+        return error
+    }
+};
 
-module.exports = { signUp, signIn, verifyUserEmail }
+module.exports = { signUp, signIn, verifyUserEmail, list }

@@ -1,9 +1,20 @@
 
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { signUp, signIn, verifyUserEmail } = require('../services/userService');
+const { signUp, signIn, verifyUserEmail, list } = require('../services/userService');
 const { createJwtToken, createTokenUser } = require('../utils');
-
+const getAllUsers = async (req, res) => {
+    try {
+        const result = await list();
+        if (result.status == 200) {
+            res.status(StatusCodes.OK).json({ message: result.message, data: result.data });
+        } else {
+            res.status(StatusCodes.NOT_FOUND).json({ data: result.data });
+        }
+    } catch (error) {
+        return error
+    }
+};
 const register = async (req, res) => {
     let result = await signUp(req);
     if(result.status == 400){
@@ -44,5 +55,6 @@ module.exports = {
     register,
     login,
     logout,
-    verifyEmail
+    verifyEmail,
+    getAllUsers
 };

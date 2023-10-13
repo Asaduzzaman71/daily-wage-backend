@@ -5,14 +5,13 @@ const multer = require("multer");
 const http = require('http');
 const express = require('express');
 var cookieParser = require('cookie-parser');
-const socketIo = require('socket.io');
 const app = express();
 const sequelize = require('./config/database');
 
 //internal imports
 
 const authRouter = require('./routes/userRoute');
-const categoryRouter = require('./routes/categoryRoute');
+const userRouter = require('./routes/userRoute');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorMiddleware = require('./middleware/error-handler');
 const { authenticateUser, authorizePermissions } = require('./middleware/authentication');
@@ -24,7 +23,7 @@ app.use(cookieParser(process.env.JWT_SECRET));
 
 //all api routes
 app.use('/api/auth', authRouter);
-app.use('/api/categories', authenticateUser, categoryRouter);
+app.use('/api/users', authenticateUser, userRouter);
 
 // middleware
 app.use(notFoundMiddleware);
