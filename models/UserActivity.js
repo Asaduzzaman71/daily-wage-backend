@@ -1,12 +1,7 @@
 
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
-class UserVerify extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+class UserActivity extends Model {
     static associate(models) {
         // define association here
         this.belongsTo(models.User, {
@@ -15,7 +10,7 @@ class UserVerify extends Model {
         });
     }
 }
-UserVerify.init({
+UserActivity.init({
     id: {
         allowNull: false,
         autoIncrement: true,
@@ -29,17 +24,17 @@ UserVerify.init({
             key: 'id'
         }
     },
-    emailVerificationToken: {
+    ipAddress: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    isEmailVerified: {
-        type: DataTypes.BOOLEAN,
+    userAgent: {
+        type: DataTypes.TEXT,
         defaultValue: false
     },
 }, {
     sequelize,
-    modelName: 'UserVerify',
-    tableName: 'user_verifies'
+    modelName: 'UserActivity',
+    tableName: 'user_activities'
 });
-module.exports = UserVerify ;
+module.exports = UserActivity ;
