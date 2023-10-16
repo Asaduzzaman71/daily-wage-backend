@@ -48,7 +48,7 @@ const signUp = async (req) => {
     //hashed password before save into db
     req.body.password = await bcrypt.hash(req.body.password, 10);
     const token = randomNumber(100000, 999999);
-    req.body.profilePic = req.file.filename
+    req.body.profilePic = req?.file ? req.file.filename : null
     const { name, email, password, phone, role, profilePic } = req.body;
     const user = await User.create({
       name,
