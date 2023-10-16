@@ -22,6 +22,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      phone: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       role: {
         type: Sequelize.ENUM("admin", "user"),
         allowNull: false,
