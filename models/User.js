@@ -2,6 +2,7 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
 const UserVerify = require('./UserVerify');
+const { randomNumber } = require('../services/userService')
 class User extends Model {
 
 }
@@ -12,11 +13,7 @@ User.init({
     primaryKey: true,
     type: DataTypes.INTEGER
   },
-  firstName: {
-    allowNull: false,
-    type: DataTypes.STRING
-  },
-  lastName: {
+  name: {
     allowNull: false,
     type: DataTypes.STRING
   },

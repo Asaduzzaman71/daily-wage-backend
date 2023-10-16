@@ -1,13 +1,7 @@
 const { body ,check} = require('express-validator');
 const registrationDataValidation = [
-    body('firstName').isLength({ min: 1, }).withMessage('Enter a name within 1 chars long'),
-    body('lastName').isLength({ min: 1, }).withMessage('Enter a name within 1 chars long'),
-    body('email').isEmail().withMessage('must be a valid email'),
-    // check('password')
-    // .isLength({ min: 5 })
-    // .withMessage('must be at least 5 chars long')
-    // .matches(/\d/)
-    // .withMessage('must contain a number'),
+    body('name').isLength({ min: 1, }).withMessage('Enter name within 1 chars long'),
+    body('email').isEmail().withMessage('Must be a valid email'),
     body('password').isStrongPassword({
         minLength: 8,
         minLowercase: 1,
@@ -18,7 +12,6 @@ const registrationDataValidation = [
         if (value !== req.body.password) {
             throw new Error('Password confirmation does not match password');
         }
-        // Indicates the success of this synchronous custom validator
         return true;
     }),
 ]

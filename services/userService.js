@@ -49,10 +49,9 @@ const signUp = async (req) => {
     req.body.password = await bcrypt.hash(req.body.password, 10);
     const token = randomNumber(100000, 999999);
     req.body.profilePic = req.file.filename
-    const { firstName, lastName, email, password, role, profilePic } = req.body;
+    const { name, email, password, role, profilePic } = req.body;
     const user = await User.create({
-      firstName,
-      lastName,
+      name,
       email,
       password,
       role,
@@ -145,4 +144,4 @@ const allUserslogs = async (req) => {
   }
 }
 
-module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs }
+module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber }
