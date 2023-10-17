@@ -22,9 +22,9 @@ const { transporter } = require('../config/email');
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
  */
-const getUserByEmail = async (req) => {
+const getUserByEmail = async (email) => {
     const user = await User.findOne({
-      where: { email: req.body.email },
+      where: { email : email},
       include: [
         {
           model: UserVerify,
@@ -41,7 +41,7 @@ const randomNumber = (min, max) => {
 }
 const signUp = async (req) => {
     //check email existance
-    const emailAlreadyExist = await getUserByEmail(req);
+    const emailAlreadyExist = await getUserByEmail(req.body.email);
     if (emailAlreadyExist){
         return { status: 400, message: "Email already exists" }
     }
@@ -85,7 +85,7 @@ const signIn = async (req) => {
     if (!email || !password) {
         return { status: 400, message: "Please provide email and password" }
     }
-    const user = await getUserByEmail(req);
+    const user = await getUserByEmail(req.body.email);
     if (!user) {
         return { status: 401, message: "Invalid Credentials" }
     }
@@ -108,7 +108,7 @@ const verifyUserEmail = async ( req ) => {
     if (!req.body.email || !req.body.otp) {
         return { status: 400, message: "Invalid request" }
     }
-    const user = await getUserByEmail(req);
+    const user = await getUserByEmail(req.body.email);
     if ( user){
         if (user.userVerify.emailVerificationToken == req.body.otp ){
             const result = await verifyAccountByUserId( user.id )
@@ -145,4 +145,4 @@ const allUserslogs = async (req) => {
   }
 }
 
-module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber }
+module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber, getUserByEmail }

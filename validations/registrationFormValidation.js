@@ -1,13 +1,10 @@
 const { body ,check} = require('express-validator');
-const User = require('../models/User')
-const isEmailUnique = async (email) => {
-    const user = await User.findOne({ email });
-    return !user; // Return true if email is unique, false otherwise
-  };
+const { getUserByEmail} = require('../services/userService')
 const registrationFormValidation = [
     body('name').isLength({ min: 1, }).withMessage('Enter name within 1 chars long'),
     check('email').isEmail().withMessage('Invalid email format').custom(async (email) => {
-        if (!(await isEmailUnique(email))) {
+      const user = await getUserByEmail(email)
+        if (user) {
           throw new Error('Email is already in use');
         }
     }),
