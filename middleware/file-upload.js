@@ -43,7 +43,7 @@ const upload = multer({
             if ( file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
                 cb(null, true);
             }else {
-				cb(createError("Only .jpg, .png or .jpeg format allowed!"));
+				cb(createError(400, "Only .jpg, .png or .jpeg format allowed!"));
             }
         }else{
 			cb(createError("There was an unknown error!"));
