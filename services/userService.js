@@ -135,8 +135,14 @@ const allUserslogs = async (req) => {
   const limit = perPage;
   try {
     const userLogs = await UserActivity.findAll({
+      include: [
+        {
+          model: User,
+          as: "user",
+        },
+      ],
       limit,
-      offset,
+      offset
     });
     console.log('userLogs',userLogs)
     return { status: 200, message: 'Activity logs found', data: userLogs }

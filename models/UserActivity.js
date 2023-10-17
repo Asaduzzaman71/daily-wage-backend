@@ -1,13 +1,11 @@
 
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
+const User = require('./User')
+
 class UserActivity extends Model {
     static associate(models) {
-        // define association here
-        this.belongsTo(models.User, {
-            foreignKey: "userID",
-            as: 'user'
-        });
+        
     }
 }
 UserActivity.init({
@@ -37,4 +35,8 @@ UserActivity.init({
     modelName: 'UserActivity',
     tableName: 'user_activities'
 });
+UserActivity.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'user'
+  })
 module.exports = UserActivity ;

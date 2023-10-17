@@ -1,10 +1,12 @@
 
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
-const UserVerify = require('./UserVerify');
-const { randomNumber } = require('../services/userService')
 class User extends Model {
-
+  static associate(models) {
+    // define association here
+    this.hasMany(models.UserActivity);
+    this.hasOne(models.UserVerify);
+  }
 }
 User.init({
   id: {
@@ -45,8 +47,4 @@ User.init({
   sequelize,
   modelName: 'User',
 });
-User.hasOne(UserVerify, {
-      foreignKey: 'userId',
-      as: 'userVerify'
-    })
 module.exports = User;

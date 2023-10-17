@@ -10,7 +10,7 @@ class UserVerify extends Model {
     static associate(models) {
         // define association here
         this.belongsTo(models.User, {
-            foreignKey: "userID",
+            foreignKey: "userId",
             as: 'user'
         });
     }
