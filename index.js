@@ -1,6 +1,7 @@
 //external imports
 require('dotenv').config();
 require('express-async-errors');
+require('./models')
 const multer = require("multer");
 const http = require('http');
 const express = require('express');
@@ -36,7 +37,7 @@ const port = process.env.PORT || 3000;
 const start = async () => {
   try {
     // connectDB
-      await sequelize.authenticate()
+      // await sequelize.authenticate()
       console.log('Connection has been established successfully.');
       server.listen(port, () => console.log(`Server is listening port ${port}...`));
   } catch (error) {

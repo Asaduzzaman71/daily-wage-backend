@@ -1,44 +1,31 @@
-const User = require("../models/User");
-const UserVerify = require("../models/UserVerify");
-const UserActivity = require("../models/UserActivity");
+// const User = require("../models/User");
+// const UserVerify = require("../models/UserVerify");
+// const UserActivity = require("../models/UserActivity");
+const db = require('../models')
+const User = db.User
+const UserVerify = db.UserVerify
+const UserActivity = db.UserActivity
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
 const { transporter } = require('../config/email');
 
-// const saveUser = async (req) => {
-//     //check email existance
-//     const emailAlreadyExist = await getUserByEmail(req);
-//     if(emailAlreadyExist){
-//         return { status:400, message:"Email already exists" }
-//     }
-//     //hashed password before save into db
-//     req.body.password = await bcrypt.hash(req.body.password, 10);
-//     req.body.profile_pic = req.file.filename
-//     const user = createOrUpdateUser(req);
-//     return { status: 200, message: 'User saved successfully', data: user }
-// };
 
-/**
- * Returns a random number between min (inclusive) and max (exclusive)
- */
-const getUserByEmail = async (email) => {
-    const user = await User.findOne({
-      where: { email : email},
-      include: [
-        {
-          model: UserVerify,
-          as: "userVerify",
-        },
-      ],
-    });
-    return user;
-  };
+
+//  Returns a random number between min (inclusive) and max (exclusive)
 const randomNumber = (min, max) => {
     return Math.floor(
         Math.random() * (max - min) + min
     )
 }
+const getUserByEmail = async (email) => {
+    const user = await User.findOne({
+      where: { email : email },
+      include: [{ model: UserVerify, as: 'userVerify'}]
+    });
+    return user;
+  };
+
 const signUp = async (req) => {
     //check email existance
     const emailAlreadyExist = await getUserByEmail(req.body.email);
@@ -93,7 +80,7 @@ const signIn = async (req) => {
     if ( !isPasswordCorrect ) {
         return { status: 401, message: "Invalid Credentials" }
     }
-    if ( user.userVerify.isEmailVerified == false ) {
+    if ( user?.userVerify?.isEmailVerified == false ) {
         return { status: 401, message: "Account verification pending" }
     }
     const userActivity = await UserActivity.create({
@@ -122,7 +109,7 @@ const verifyUserEmail = async ( req ) => {
 }
 const allUsers = async () => {
     try {
-        const users = await User.findAll();
+        const users = await User.findAll({include: [{ model: UserVerify, as:'userVerify'}]});
         return { status: 200, message: 'Users found', data: users }
     } catch (error) {
         return error
@@ -135,12 +122,7 @@ const allUserslogs = async (req) => {
   const limit = perPage;
   try {
     const userLogs = await UserActivity.findAll({
-      include: [
-        {
-          model: User,
-          as: "user",
-        },
-      ],
+      include: [{ model: User, as:'user'}],
       limit,
       offset
     });
