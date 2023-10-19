@@ -8,6 +8,7 @@ const express = require('express');
 var cookieParser = require('cookie-parser');
 const app = express();
 const sequelize = require('./config/database');
+var cors = require('cors')
 
 //internal imports
 
@@ -17,7 +18,7 @@ const notFoundMiddleware = require('./middleware/not-found');
 const errorMiddleware = require('./middleware/error-handler');
 const { authenticateUser, authorizePermissions } = require('./middleware/authentication');
 
-
+app.use(cors())
 // Add this line to parse JSON request bodies
 app.use(express.json());
 //all api routes
@@ -32,7 +33,7 @@ app.use(errorMiddleware);
 const server = http.createServer(app);
 
 //get port number from env
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3004;
 
 const start = async () => {
   try {
