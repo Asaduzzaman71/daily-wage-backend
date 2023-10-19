@@ -1,7 +1,7 @@
 
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { signUp, signIn, verifyUserEmail, allUsers, allUserslogs } = require('../services/userService');
+const { signUp, signIn, verifyUserEmail, allUsers, saveUserActivityLog } = require('../services/userService');
 const { createJwtToken, createTokenUser } = require('../utils');
 const getAllUsers = async (req, res) => {
     try {
@@ -48,11 +48,8 @@ const login = async (req, res) => {
     }
 };
 const logout = async (req, res) => {
-    res.cookie('token', 'logout', {
-        httpOnly: true,
-        expires: new Date(Date.now() + 1000),
-    });
-    res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
+    await saveUserActivityLog(req.body.userId, 'logout', req)
+    res.status(StatusCodes.OK).json({ msg: 'logged out succfull!' });
 };
 const verifyEmail = async ( req, res ) => {
     const result = await verifyUserEmail( req );

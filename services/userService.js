@@ -48,7 +48,7 @@ const signUp = async (req) => {
     const userVerify = await UserVerify.create({
       userId: user.id,
       emailVerificationToken: token,
-      isEmailVerified: false,
+      isEmailVerified: true,
     });
     
     // var mailOptions = {
@@ -66,7 +66,17 @@ const signUp = async (req) => {
     // });
     return { status: 201, message: 'User saved successfully', data: user }
 };
+const saveUserActivityLog = async(userId, activity, req) =>{
+    const userActivityLog = await UserActivity.create({
+        userId: userId,
+        ipAddress: req.ip,
+        activity,
+        userAgent: req.get('User-Agent'),
 
+    })
+    return userActivityLog;
+
+}
 const signIn = async (req) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -83,11 +93,8 @@ const signIn = async (req) => {
     if ( user?.userVerify?.isEmailVerified == false ) {
         return { status: 401, message: "Account verification pending" }
     }
-    const userActivity = await UserActivity.create({
-        userId: user.id,
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent'),
-    });
+    saveUserActivityLog(user.id, 'login', req)
+   
     return { status: 200, data: user }
 };
 
@@ -133,4 +140,4 @@ const allUserslogs = async (req) => {
   }
 }
 
-module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber, getUserByEmail }
+module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber, getUserByEmail, saveUserActivityLog }

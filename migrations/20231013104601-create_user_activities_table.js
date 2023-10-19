@@ -28,6 +28,10 @@ module.exports = {
           defaultValue: false,
           type: Sequelize.TEXT
         },
+        activity: {
+          defaultValue: false,
+          type: Sequelize.STRING
+        },
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,

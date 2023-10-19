@@ -24,6 +24,10 @@ const UserActivity = sequelize.define('UserActivity', {
             type: DataTypes.TEXT,
             defaultValue: false
         },
+        activity: {
+            type: DataTypes.STRING,
+            defaultValue: false,
+          },
     },{
         tableName: 'user_activities'
     });
