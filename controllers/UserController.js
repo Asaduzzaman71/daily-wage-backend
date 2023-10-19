@@ -1,7 +1,7 @@
 
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { signUp, signIn, verifyUserEmail, allUsers, saveUserActivityLog } = require('../services/userService');
+const { signUp, signIn, verifyUserEmail, allUsers, saveUserActivityLog, allUserslogs } = require('../services/userService');
 const { createJwtToken, createTokenUser } = require('../utils');
 const getAllUsers = async (req, res) => {
     try {
