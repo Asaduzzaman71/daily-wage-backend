@@ -23,7 +23,7 @@ app.use(express.json());
 //all api routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
-
+app.use(express.static('public'));
 // middleware
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
