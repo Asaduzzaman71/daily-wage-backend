@@ -97,7 +97,6 @@ const signIn = async (req) => {
         return { status: 401, message: "Account verification pending" }
     }
     saveUserActivityLog(user.id, 'login', req)
-   
     return { status: 200, data: user }
 };
 
@@ -131,12 +130,23 @@ const allUserslogs = async (req) => {
   const offset = (page - 1) * perPage;
   const limit = perPage;
   try {
-    const userLogs = await UserActivity.findAll({
-      include: [{ model: User, as:'user'}],
-      limit,
-      offset
-    });
-    console.log('userLogs',userLogs)
+    let userLogs
+    if(req.user.role == 'admin'){
+        userLogs = await UserActivity.findAll({
+            include: [{ model: User, as:'user'}],
+            limit,
+            offset
+        });
+    }else{
+        userLogs = await UserActivity.findAll({
+            where: {
+                userId: req.user.userId, // Filter records where age is equal to 30
+            },
+            include: [{ model: User, as:'user'}],
+            limit,
+            offset
+        });
+    }
     return { status: 200, message: 'Activity logs found', data: userLogs }
   } catch (error) {
     return error

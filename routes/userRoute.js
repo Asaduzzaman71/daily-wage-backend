@@ -6,6 +6,6 @@ const {
     getAllUsersLogs
 } = require('../controllers/UserController');
 
-router.get('/', authenticateUser, getAllUsers);
-router.get('/activity-logs', authenticateUser, authorizePermissions(['admin']), getAllUsersLogs);
+router.get('/', authenticateUser, authorizePermissions(['admin']), getAllUsers);
+router.get('/activity-logs', authenticateUser,  getAllUsersLogs);
 module.exports = router
