@@ -1,5 +1,6 @@
 'use strict';
-const User = require("../models/User");
+const db = require('../models')
+const User = db.User
 const { randomNumber } = require('../services/userService')
 
 /** @type {import('sequelize-cli').Migration} */
