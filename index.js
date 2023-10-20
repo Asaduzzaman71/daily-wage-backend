@@ -9,6 +9,8 @@ var cookieParser = require('cookie-parser');
 const app = express();
 const sequelize = require('./config/database');
 var cors = require('cors')
+const useragent = require('express-useragent');
+
 
 //internal imports
 
@@ -18,13 +20,14 @@ const notFoundMiddleware = require('./middleware/not-found');
 const errorMiddleware = require('./middleware/error-handler');
 const { authenticateUser, authorizePermissions } = require('./middleware/authentication');
 
-app.use(cors())
 // Add this line to parse JSON request bodies
 app.use(express.json());
+app.use(cors())
+app.use(useragent.express());
+app.use(express.static('public'));
 //all api routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
-app.use(express.static('public'));
 // middleware
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

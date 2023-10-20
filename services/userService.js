@@ -67,11 +67,14 @@ const signUp = async (req) => {
     return { status: 201, message: 'User saved successfully', data: user }
 };
 const saveUserActivityLog = async(userId, activity, req) =>{
+
     const userActivityLog = await UserActivity.create({
         userId: userId,
         ipAddress: req.ip,
         activity,
-        userAgent: req.get('User-Agent'),
+        browser : req.useragent.browser,
+        os : req.useragent.os,
+        device : req.useragent.isMobile ? 'Mobile' : 'Desktop'
 
     })
     return userActivityLog;

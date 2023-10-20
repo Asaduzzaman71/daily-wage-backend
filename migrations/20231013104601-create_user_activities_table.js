@@ -24,7 +24,15 @@ module.exports = {
           allowNull: false,
           type: Sequelize.STRING
         },
-        userAgent: {
+        os: {
+          defaultValue: false,
+          type: Sequelize.TEXT
+        },
+        browser: {
+          defaultValue: false,
+          type: Sequelize.TEXT
+        },
+        device: {
           defaultValue: false,
           type: Sequelize.TEXT
         },

@@ -20,14 +20,22 @@ const UserActivity = sequelize.define('UserActivity', {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        userAgent: {
-            type: DataTypes.TEXT,
-            defaultValue: false
+        os: {
+            type: DataTypes.STRING,
+            defaultValue: false,
+        },
+        browser: {
+            type: DataTypes.STRING,
+            defaultValue: false,
+        },
+        device: {
+            type: DataTypes.STRING,
+            defaultValue: false,
         },
         activity: {
             type: DataTypes.STRING,
             defaultValue: false,
-          },
+        },
     },{
         tableName: 'user_activities'
     });
