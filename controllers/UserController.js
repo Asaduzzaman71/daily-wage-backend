@@ -5,7 +5,7 @@ const { signUp, signIn, verifyUserEmail, allUsers, saveUserActivityLog, allUsers
 const { createJwtToken, createTokenUser } = require('../utils');
 const getAllUsers = async (req, res) => {
     try {
-        const result = await allUsers();
+        const result = await allUsers(req);
         if (result.status == 200) {
             res.status(StatusCodes.OK).json({ message: result.message, data: result.data });
         } else {

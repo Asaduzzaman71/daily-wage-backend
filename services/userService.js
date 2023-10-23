@@ -9,8 +9,7 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
 const { transporter } = require('../config/email');
-
-
+const { Op } = require('sequelize');
 
 //  Returns a random number between min (inclusive) and max (exclusive)
 const randomNumber = (min, max) => {
@@ -116,9 +115,29 @@ const verifyUserEmail = async ( req ) => {
         }
     }
 }
-const allUsers = async () => {
+const allUsers = async (req) => {
     try {
-        const users = await User.findAll({include: [{ model: UserVerify, as:'userVerify'}]});
+       
+        const searchName = req.query.name;
+        console.log('Search Name:', searchName);
+        let users
+        if(searchName){
+            users = await User.findAll({
+                where: {
+                    name: {
+                    [Op.like]: `%${searchName}%`,
+                    },
+                },
+                include: [{ model: UserVerify, as:'userVerify'}]
+            });
+        }else{
+            users = await User.findAll({
+                include: [{ model: UserVerify, as:'userVerify'}]
+            });
+
+        }
+        
+      
         return { status: 200, message: 'Users found', data: users }
     } catch (error) {
         return error
