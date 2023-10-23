@@ -148,23 +148,42 @@ const allUserslogs = async (req) => {
   const perPage = 10; // Number of items per page
   const offset = (page - 1) * perPage;
   const limit = perPage;
+  let queryOptions = {
+        where: {
+            createdAt: {
+                [Op.between]: [req.query.startDate, req.query.endDate],
+            },
+        },
+        include: [
+            {
+                model: User,
+                as:'user'
+            },
+        ],
+        limit,
+        offset
+    };
+    const searchName = req.query.name;
+    if (searchName) {
+        queryOptions.include[0].where = {
+            name: {
+                [Op.like]: `%${searchName}%`,
+            },
+        };
+    }
   try {
     let userLogs
     if(req.user.role == 'admin'){
-        userLogs = await UserActivity.findAll({
-            include: [{ model: User, as:'user'}],
-            limit,
-            offset
-        });
+        userLogs = await UserActivity.findAll(queryOptions);
     }else{
-        userLogs = await UserActivity.findAll({
-            where: {
-                userId: req.user.userId, // Filter records where age is equal to 30
-            },
-            include: [{ model: User, as:'user'}],
-            limit,
-            offset
-        });
+        const authUserId = req.user.userId 
+        if (authUserId) {
+            queryOptions.where = {
+                ...queryOptions.where,
+                userId: authUserId,
+            };
+        }
+        userLogs = await UserActivity.findAll(queryOptions);
     }
     return { status: 200, message: 'Activity logs found', data: userLogs }
   } catch (error) {
