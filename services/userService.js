@@ -9,7 +9,7 @@ const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
 const { transporter } = require('../config/email');
-const { Op } = require('sequelize');
+const { Sequelize, Op } = require('sequelize');
 
 //  Returns a random number between min (inclusive) and max (exclusive)
 const randomNumber = (min, max) => {
@@ -134,10 +134,7 @@ const allUsers = async (req) => {
             users = await User.findAll({
                 include: [{ model: UserVerify, as:'userVerify'}]
             });
-
         }
-        
-      
         return { status: 200, message: 'Users found', data: users }
     } catch (error) {
         return error
@@ -191,4 +188,27 @@ const allUserslogs = async (req) => {
   }
 }
 
-module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber, getUserByEmail, saveUserActivityLog }
+const activityReports = async ( req ) => {
+    try {
+        let userAtivities
+        userAtivities = await UserActivity.findAll({
+            attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('activity')), 'activityCount']],
+            where: {
+                createdAt: {
+                    [Op.between]: [req.query.startDate, req.query.endDate],
+                },
+            },
+            group: ['userId'],
+            include: [
+                {
+                    model: User,
+                    as: 'user'
+                },
+            ],
+        })
+        return { status: 200, message: 'Activity logs found', data: userAtivities }
+    } catch (error) {
+        return error
+    }
+}
+module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber, getUserByEmail, saveUserActivityLog , activityReports}
