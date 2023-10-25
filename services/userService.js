@@ -171,7 +171,7 @@ const allUserslogs = async (req) => {
   try {
     let userLogs
     if(req.user.role == 'admin'){
-        userLogs = await UserActivity.findAll(queryOptions);
+        userLogs = await UserActivity.findAndCountAll(queryOptions);
     }else{
         const authUserId = req.user.userId 
         if (authUserId) {
@@ -180,7 +180,7 @@ const allUserslogs = async (req) => {
                 userId: authUserId,
             };
         }
-        userLogs = await UserActivity.findAll(queryOptions);
+        userLogs = await UserActivity.findAndCountAll(queryOptions);
     }
     return { status: 200, message: 'Activity logs found', data: userLogs }
   } catch (error) {
