@@ -14,6 +14,11 @@ const sequlize = new Sequelize(
             min: 0,
             acquire: 30000,
             idle: 10000
+        },
+        define: {
+            timestamps: true,
+            paranoid: true, // enables soft deletion
+            underscored: true // uses snake_case for column names
         }
     }
 );

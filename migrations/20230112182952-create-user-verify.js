@@ -9,7 +9,7 @@ module.exports = {
             primaryKey: true,
             type: Sequelize.INTEGER
         },
-        userId: {
+        user_id: {
           type: Sequelize.DataTypes.INTEGER,
           references: {
             model: {
@@ -19,19 +19,19 @@ module.exports = {
           },
           allowNull: false
         },
-        emailVerificationToken: {
+        email_verification_token: {
           allowNull: false,
           type: Sequelize.STRING
         },
-        isEmailVerified: {
+        is_email_verified: {
           defaultValue: false,
           type: Sequelize.BOOLEAN
         },
-        createdAt: {
+        created_at: {
           allowNull: false,
           type: Sequelize.DATE,
         },
-        updatedAt: {
+        updated_at: {
           allowNull: false,
           type: Sequelize.DATE,
         }

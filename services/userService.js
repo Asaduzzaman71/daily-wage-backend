@@ -18,13 +18,37 @@ const randomNumber = (min, max) => {
     )
 }
 const getUserByEmail = async (email) => {
-    const user = await User.findOne({
+    const user = await User.scope('withPassword').findOne({
       where: { email : email },
       include: [{ model: UserVerify, as: 'userVerify'}]
     });
     return user;
-  };
-
+};
+const signIn = async (req) => {
+    try {
+        const { email, password } = req.body;
+        const user = await getUserByEmail(email);
+        
+        if (!user) {
+            return { status: 401, message: "Invalid Credentials" }
+        }
+        
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        
+        if (!isPasswordCorrect) {
+            return { status: 401, message: "Invalid Credentials" }
+        }
+        
+        if (user?.userVerify?.is_email_verified == false) {
+            return { status: 401, message: "Account verification pending" }
+        }
+        
+        return { status: 200, data: user }
+    } catch (error) {
+        console.error('Error in signIn:', error);
+        return { status: 500, message: "Internal server error" }
+    }
+};
 const signUp = async (req) => {
     //check email existance
     const emailAlreadyExist = await getUserByEmail(req.body.email);
@@ -34,20 +58,18 @@ const signUp = async (req) => {
     //hashed password before save into db
     req.body.password = await bcrypt.hash(req.body.password, 10);
     const token = randomNumber(100000, 999999);
-    req.body.profilePic = req?.file ? req.file.filename : null
-    const { name, email, password, phone, role, profilePic } = req.body;
+    const { name, email, password, phone, role = 'user' } = req.body;
     const user = await User.create({
       name,
       email,
       password,
       phone,
       role,
-      profilePic
     });
     const userVerify = await UserVerify.create({
-      userId: user.id,
-      emailVerificationToken: token,
-      isEmailVerified: true,
+      user_id: user.id,
+      email_verification_token: token,
+      is_email_verified: true,
     });
     
     // var mailOptions = {
@@ -67,37 +89,22 @@ const signUp = async (req) => {
 };
 const saveUserActivityLog = async(userId, activity, req) =>{
 
+   
+
     const userActivityLog = await UserActivity.create({
-        userId: userId,
-        ipAddress: req.ip,
+        user_id: userId,
+        ip_address: req.ip,
         activity,
         browser : req.useragent.browser,
         os : req.useragent.os,
         device : req.useragent.isMobile ? 'Mobile' : 'Desktop'
 
     })
+     console.log('userActivityLog==================>', userActivityLog)
     return userActivityLog;
 
 }
-const signIn = async (req) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return { status: 400, message: "Please provide email and password" }
-    }
-    const user = await getUserByEmail(req.body.email);
-    if (!user) {
-        return { status: 401, message: "Invalid Credentials" }
-    }
-    const isPasswordCorrect = await bcrypt.compare( password, user.password );
-    if ( !isPasswordCorrect ) {
-        return { status: 401, message: "Invalid Credentials" }
-    }
-    if ( user?.userVerify?.isEmailVerified == false ) {
-        return { status: 401, message: "Account verification pending" }
-    }
-    saveUserActivityLog(user.id, 'login', req)
-    return { status: 200, data: user }
-};
+
 
 const verifyUserEmail = async ( req ) => {
     if (!req.body.email || !req.body.otp) {

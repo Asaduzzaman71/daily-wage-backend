@@ -25,7 +25,7 @@ app.use(express.json());
 app.use(cors())
 app.use(useragent.express());
 app.use(express.static('public'));
-//all api routes
+//all api group routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 // middleware
@@ -41,7 +41,7 @@ const port = process.env.PORT || 3004;
 const start = async () => {
   try {
     // connectDB
-      // await sequelize.authenticate()
+      await sequelize.authenticate()
       console.log('Connection has been established successfully.');
       server.listen(port, () => console.log(`Server is listening port ${port}...`));
   } catch (error) {

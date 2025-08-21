@@ -10,7 +10,7 @@ module.exports = {
             primaryKey: true,
             type: Sequelize.INTEGER
         },
-        userId: {
+        user_id: {
           type: Sequelize.DataTypes.INTEGER,
           references: {
             model: {
@@ -20,7 +20,7 @@ module.exports = {
           },
           allowNull: false
         },
-        ipAddress: {
+        ip_address: {
           allowNull: false,
           type: Sequelize.STRING
         },
@@ -40,11 +40,11 @@ module.exports = {
           defaultValue: false,
           type: Sequelize.STRING
         },
-        createdAt: {
+        created_at: {
           allowNull: false,
           type: Sequelize.DATE,
         },
-        updatedAt: {
+        updated_at: {
           allowNull: false,
           type: Sequelize.DATE,
         }

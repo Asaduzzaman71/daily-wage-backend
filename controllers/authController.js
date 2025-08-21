@@ -2,37 +2,28 @@ const User = require('../models/User');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
-const { attachCookiesToResponse, createTokenUser } = require('../utils');
-
+const { createJwtToken, createTokenUser } = require('../utils');
+const { signUp, signIn, saveUserActivityLog} = require('../services/userService');
 const register = async (req, res) => {
-    const profile_pic = req.file.filename
-    const { firstName: first_name, lastName: last_name, email, password, role, email_verification_token, is_email_verified } = req.body;
-    const emailAlreadyExists = await User.findOne({ where: { email: email } });
-    if (emailAlreadyExists) {
-        throw new CustomError.BadRequestError('Email already exists');
+    let result = await signUp(req);
+    if(result.status == 400){
+        throw new CustomError.BadRequestError(result.message);
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ first_name, last_name, email, password, role, profile_pic, email_verification_token, is_email_verified });
-    const tokenUser = createTokenUser(user);
-    attachCookiesToResponse({ res, user: tokenUser });
-    res.status(StatusCodes.CREATED).json({ user: tokenUser });
+    res.status(StatusCodes.CREATED).json({ message:'Registration successful', user: result.data });
 };
 const login = async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        throw new CustomError.BadRequestError('Please provide email and password');
+    const result = await signIn( req )
+    if ( result.status == 400 ){
+        throw new CustomError.BadRequestError( result.message );
+    } else if (result.status == 401 ){
+        throw new CustomError.UnauthenticatedError( result.message );
+    }else{
+        const user = createTokenUser( result.data );
+        console.log('USER', user)
+        const token = createJwtToken({ user: user });
+        let activityLog = await saveUserActivityLog(user.id, 'login', req)
+        res.status(StatusCodes.OK).json({ message:'Login successful', access_token: token , user: user});
     }
-    const user = await User.findOne({ where: { email: email } });
-    if (!user) {
-        throw new CustomError.UnauthenticatedError('Invalid Credentials');
-    }
-    const isPasswordCorrect = await user.comparePassword(password);
-    if (!isPasswordCorrect) {
-        throw new CustomError.UnauthenticatedError('Invalid Credentials');
-    }
-    const tokenUser = createTokenUser(user);
-    attachCookiesToResponse({ res, user: tokenUser });
-    res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 const logout = async (req, res) => {
     res.cookie('token', 'logout', {

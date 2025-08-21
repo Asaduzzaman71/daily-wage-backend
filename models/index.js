@@ -1,50 +1,46 @@
 require('dotenv').config();
-const {Sequelize, DataTypes} = require("sequelize");
+const fs = require('fs');
+const path = require('path');
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = require('../config/database')
 
-const sequelize = new Sequelize(
-    process.env.DATABASE_NAME,
-    process.env.DATABASE_USERNAME,
-    process.env.DATABASE_PASSWORD,
-    {
-        port: process.env.DATABASE_PORT,
-        host: process.env.DATABASE_HOST,
-        dialect: 'mysql',
-        pool: {
-            max: 5,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-        }
+
+// Test the database connection
+// (async () => {
+//     try {
+//         await sequelize.authenticate();
+//         console.log('Database connection established successfully.');
+//     } catch (error) {
+//         console.error('Unable to connect to the database:', error);
+//         process.exit(1);
+//     }
+// })();
+
+const db = {
+    sequelize,
+    Sequelize
+};
+
+// Dynamically load all model files
+fs.readdirSync(__dirname)
+    .filter(file => {
+        return (
+            file !== 'index.js' && // skip this file
+            file.endsWith('.js') && // only JS files
+            !file.includes('.test.js') // skip test files
+        );
+    })
+    .forEach(file => {
+        const modelPath = path.join(__dirname, file);
+        const model = require(modelPath)(sequelize, DataTypes);
+        db[model.name] = model;
+    });
+
+// Set up model associations
+Object.keys(db).forEach(modelName => {
+    if (db[modelName].associate) {
+        db[modelName].associate(db);
     }
-);
-try {
-    // connectDB
-    sequelize.authenticate()
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.log(error);
-  }
-const db = {}
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-db.User = require('./User')(sequelize, DataTypes)
-db.UserActivity = require('./UserActivity')(sequelize, DataTypes)
-db.UserVerify = require('./UserVerify')(sequelize, DataTypes)
+});
 
-db.User.hasOne(db.UserVerify, {
-  as: 'userVerify',
-  foreignKey: 'userId'
-});
-db.User.hasMany(db.UserActivity, {
-  as: 'userActivities',
-  foreignKey: 'userId'
-});
-db.UserVerify.belongsTo(db.User, {
-    as: 'user',
-    foreignKey: 'userId'
-});
-db.UserActivity.belongsTo(db.User, {
-    as: 'user',
-    foreignKey: 'userId'
-});
 module.exports = db;

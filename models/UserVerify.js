@@ -1,7 +1,4 @@
 
-// const { DataTypes } = require('sequelize');
-// const sequelize = require('../config/database');
-// const User = require('./User')
 module.exports = (sequelize,DataTypes) =>{
 const UserVerify = sequelize.define('UserVerify', {
         id: {
@@ -10,27 +7,24 @@ const UserVerify = sequelize.define('UserVerify', {
             primaryKey: true,
             type: DataTypes.INTEGER
         },
-        userId: {
+        user_id: {
             type: DataTypes.INTEGER,
             references: {
                 model: 'User', 
                 key: 'id'
             }
         },
-        emailVerificationToken: {
+        email_verification_token: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        isEmailVerified: {
+        is_email_verified: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
     }, {
-        tableName: 'user_verifies'
+        tableName: 'user_verifies',
+        paranoid: false, 
     });
     return UserVerify;
 }
-// UserVerify.belongsTo(User, {
-//     as: 'user'
-// });
-// module.exports = UserVerify ;
