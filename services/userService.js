@@ -5,6 +5,7 @@ const db = require('../models')
 const User = db.User
 const UserVerify = db.UserVerify
 const UserActivity = db.UserActivity
+const Role = db.Role;
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
 const bcrypt = require('bcrypt');
@@ -20,7 +21,11 @@ const randomNumber = (min, max) => {
 const getUserByEmail = async (email) => {
     const user = await User.scope('withPassword').findOne({
       where: { email : email },
-      include: [{ model: UserVerify, as: 'userVerify'}]
+      include: 
+        [
+            { model: UserVerify, as: 'userVerify' },
+            { model: Role, as: 'role' } 
+        ]
     });
     return user;
 };
@@ -28,6 +33,7 @@ const signIn = async (req) => {
     try {
         const { email, password } = req.body;
         const user = await getUserByEmail(email);
+        console.log('user=================>', user);
         
         if (!user) {
             return { status: 401, message: "Invalid Credentials" }
@@ -87,20 +93,77 @@ const signUp = async (req) => {
     // });
     return { status: 201, message: 'User saved successfully', data: user }
 };
+const updateUser = async(req) =>{
+    try{
+    // Get the user ID from the request parameters
+        const { id } = req.params;
+        // Get the fields to update from the request body
+        const { name, email, password, phone } = req.body;
+
+        // 1. Find the user to be updated
+        const user = await User.findByPk(id);
+
+        // If the user does not exist, return a 404 error
+        if (!user) {
+            return { status: 404, message: "User not found." };
+        }
+
+        // 2. Handle email update: check if the new email already exists for another user
+        if (email && email !== user.email) {
+            const emailAlreadyExist = await getUserByEmail(email);
+            if (emailAlreadyExist) {
+                return { status: 400, message: "Email already exists." };
+            }
+        }
+
+        // 3. Handle password update: if a new password is provided, hash it
+        if (password) {
+            user.password = await bcrypt.hash(password, 10);
+        }
+
+        // 4. Update the user's other fields, if they exist in the request body
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.phone = phone || user.phone;
+
+        // 5. Save the updated user to the database
+       let updatedUser =  await user.save();
+       // Remove password from response
+        updatedUser = updatedUser.toJSON ? updatedUser.toJSON() : updatedUser;
+        delete updatedUser.password;
+
+        // 6. Return a success message and the updated user data
+        return { 
+            status: 200, 
+            message: 'User updated successfully.', 
+            data: updatedUser 
+        };
+
+    } catch (error) {
+        console.error("Error updating user:", error);
+        return { status: 500, message: "Internal server error." };
+    }
+
+}
 const saveUserActivityLog = async(userId, activity, req) =>{
 
-   
-
+    const ipAddress = 
+        req.ip ||
+        req.socket?.remoteAddress ||
+        req.connection?.remoteAddress ||
+        req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        req.headers['x-real-ip'] ||
+        req.headers['x-client-ip'] || '127.0.0.1'
+    
     const userActivityLog = await UserActivity.create({
         user_id: userId,
-        ip_address: req.ip,
+        ip_address: ipAddress,
         activity,
         browser : req.useragent.browser,
         os : req.useragent.os,
         device : req.useragent.isMobile ? 'Mobile' : 'Desktop'
 
     })
-     console.log('userActivityLog==================>', userActivityLog)
     return userActivityLog;
 
 }
@@ -124,27 +187,47 @@ const verifyUserEmail = async ( req ) => {
 }
 const allUsers = async (req) => {
     try {
-       
+        const page = parseInt(req.query.page) || 1; // Default to page 1
+        const limit = parseInt(req.query.limit) || 1; // Default to 10 items per page
+        const offset = (page - 1) * limit; // Calculate offset
+        
         const searchName = req.query.name;
         console.log('Search Name:', searchName);
-        let users
-        if(searchName){
-            users = await User.findAll({
-                where: {
-                    name: {
-                    [Op.like]: `%${searchName}%`,
-                    },
-                },
-                include: [{ model: UserVerify, as:'userVerify'}]
-            });
-        }else{
-            users = await User.findAll({
-                include: [{ model: UserVerify, as:'userVerify'}]
-            });
+        
+        let whereCondition = {};
+        if (searchName) {
+            whereCondition.name = {
+                [Op.like]: `%${searchName}%`,
+            };
         }
-        return { status: 200, message: 'Users found', data: users }
+        
+        // Use `findAndCountAll` to get both the data and total count
+        const { count, rows: users } = await User.findAndCountAll({
+            where: whereCondition,
+            include: [{ model: UserVerify, as: 'userVerify' }],
+            limit: limit,
+            offset: offset,
+        });
+
+        // Calculate total pages
+        const totalPages = Math.ceil(count / limit);
+        
+        return {
+            status: 200,
+            message: 'Users found',
+            data: {
+                users: users,
+                pagination: {
+                    totalItems: count,
+                    totalPages: totalPages,
+                    currentPage: page,
+                    itemsPerPage: limit,
+                },
+            },
+        };
     } catch (error) {
-        return error
+        console.error('Error fetching users:', error);
+        return { status: 500, message: 'Internal server error', error: error.message };
     }
 };
 const allUserslogs = async (req) => {
@@ -218,4 +301,4 @@ const activityReports = async ( req ) => {
         return error
     }
 }
-module.exports = { signUp, signIn, verifyUserEmail, allUsers, allUserslogs, randomNumber, getUserByEmail, saveUserActivityLog , activityReports}
+module.exports = { signUp, signIn, verifyUserEmail, updateUser, allUsers, allUserslogs, randomNumber, getUserByEmail, saveUserActivityLog , activityReports}

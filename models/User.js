@@ -6,6 +6,15 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             type: DataTypes.INTEGER
         },
+        role_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'Role', // Sequelize automatically pluralizes table names
+                key: 'id'
+            },
+            onDelete: 'CASCADE' // Delete user when user is deleted
+        },
         name: {
             allowNull: false,
             type: DataTypes.STRING,
@@ -37,12 +46,7 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true
             }
         },
-        role: {
-            type: DataTypes.ENUM("admin", "user"),
-            allowNull: false,
-            defaultValue: 'user',
-        },
-        profilePic: {
+        profile_pic: {
             type: DataTypes.STRING,
         },
         deletedAt: {
@@ -72,6 +76,11 @@ module.exports = (sequelize, DataTypes) => {
         User.hasMany(models.UserActivity, {
             as: 'userActivities',
             foreignKey: 'userId',
+            onDelete: 'CASCADE'
+        });
+        User.belongsTo(models.Role, {
+            as: 'role',
+            foreignKey: 'role_id',
             onDelete: 'CASCADE'
         });
     };

@@ -18,9 +18,6 @@ module.exports = (sequelize, DataTypes) => {
     ip_address: {
       type: DataTypes.STRING(45), // IPv6 requires 45 characters
       allowNull: false,
-      validate: {
-        isIP: true
-      }
     },
     os: {
       type: DataTypes.STRING(50),

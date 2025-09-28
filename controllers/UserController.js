@@ -1,7 +1,7 @@
 
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { signUp, signIn, verifyUserEmail, allUsers, saveUserActivityLog, allUserslogs, activityReports } = require('../services/userService');
+const { signUp, signIn, verifyUserEmail, allUsers, saveUserActivityLog, allUserslogs, activityReports, updateUser } = require('../services/userService');
 const { createJwtToken, createTokenUser } = require('../utils');
 const getAllUsers = async (req, res) => {
     try {
@@ -40,44 +40,23 @@ const getAllUsersLogs = async (req, res) => {
         return error
     }
  }
-const register = async (req, res) => {
-    let result = await signUp(req);
-    if(result.status == 400){
-        throw new CustomError.BadRequestError(result.message);
-    }
-    res.status(StatusCodes.CREATED).json({ message:'Registration successful', user: result.data });
-};
-
-const login = async (req, res) => {
-    const result = await signIn( req )
+ const update = async (req, res) =>{
+    const result = await updateUser( req )
     if ( result.status == 400 ){
         throw new CustomError.BadRequestError( result.message );
     } else if (result.status == 401 ){
         throw new CustomError.UnauthenticatedError( result.message );
+    }else if(result.status == 404){
+        throw new CustomError.NotFoundError( result.message );
     }else{
-        const tokenUser = createTokenUser( result.data );
-        const token = createJwtToken({ user: tokenUser });
-        res.status(StatusCodes.OK).json({ message:'Login successful', access_token: token });
-    }
-};
-const logout = async (req, res) => {
-    await saveUserActivityLog(req.body.userId, 'logout', req)
-    res.status(StatusCodes.OK).json({ msg: 'logged out succfull!' });
-};
-const verifyEmail = async ( req, res ) => {
-    const result = await verifyUserEmail( req );
-    if( result.status == 200 ){
-        res.status(StatusCodes.OK).json( result );
-    }else{
-        throw new CustomError.BadRequestError(result.message);
+        let activityLog = await saveUserActivityLog(result.data.id, 'update', req)
+        res.status(StatusCodes.OK).json({ message:'Update successful', user: result.data});
     }
 }
 
+
 module.exports = {
-    register,
-    login,
-    logout,
-    verifyEmail,
+    update,
     getAllUsers,
     getAllUsersLogs,
     getAllUserActivityReport

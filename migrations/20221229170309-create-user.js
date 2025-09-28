@@ -9,6 +9,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      role_id: {
+          type: Sequelize.DataTypes.INTEGER,
+          references: {
+            model: {
+              tableName: 'roles',
+            },
+            key: 'id'
+          },
+          allowNull: false
+      },
       name: {
         allowNull: false,
         type: Sequelize.STRING
@@ -25,11 +35,6 @@ module.exports = {
       phone: {
         type: Sequelize.STRING,
         allowNull: false
-      },
-      role: {
-        type: Sequelize.ENUM("admin", "user"),
-        allowNull: false,
-        defaultValue: 'user',
       },
       profile_pic: {
         type: Sequelize.STRING,

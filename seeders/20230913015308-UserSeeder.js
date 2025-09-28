@@ -1,23 +1,39 @@
-const bcrypt = require('bcrypt');
 'use strict';
+
+const bcrypt = require('bcrypt');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert('users', [
+    // Get the IDs of the roles from the existing database
+    const userRole = await queryInterface.rawSelect('Roles', { where: { name: 'user' } }, ['id']);
+    const adminRole = await queryInterface.rawSelect('Roles', { where: { name: 'admin' } }, ['id']);
+
+    if (!adminRole) {
+      throw new Error("Admin role not found. Please run the role seeder first.");
+    }
+    
+    // Insert the user and get the ID of the newly created user.
+    // We are assuming 'name' in your seeder corresponds to 'username' in the model.
+    const userId = await queryInterface.bulkInsert('users', [
       {
-        name: 'super admin',
-        email: 'superadmin@gmail.com',
+        role_id: adminRole,
+        name: 'admin',
+        email: 'admin@gmail.com',
         phone: '01756527233',
         password: await bcrypt.hash('12345678', 10),
-        role: 'admin',
-        profilePic: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        profile_pic: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
-    ]);
+    ], {});
+    if (!userId) {
+      throw new Error("user not found. Please create user first.");
+    }
+   
   },
 
   down: async (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete('users', null, {});
+    // Then delete the user
+    await queryInterface.bulkDelete('users', null, {});
   },
 };

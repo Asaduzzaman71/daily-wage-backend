@@ -19,12 +19,12 @@ const login = async (req, res) => {
         throw new CustomError.UnauthenticatedError( result.message );
     }else{
         const user = createTokenUser( result.data );
-        console.log('USER', user)
         const token = createJwtToken({ user: user });
         let activityLog = await saveUserActivityLog(user.id, 'login', req)
         res.status(StatusCodes.OK).json({ message:'Login successful', access_token: token , user: user});
     }
 };
+
 const logout = async (req, res) => {
     res.cookie('token', 'logout', {
         httpOnly: true,
