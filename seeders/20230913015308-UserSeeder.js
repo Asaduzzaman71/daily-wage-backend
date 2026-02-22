@@ -18,7 +18,7 @@ module.exports = {
       {
         role_id: adminRole,
         name: 'admin',
-        email: 'admin@gmail.com',
+        email: 'admin-1@gmail.com',
         phone: '01756527233',
         password: await bcrypt.hash('12345678', 10),
         profile_pic: null,

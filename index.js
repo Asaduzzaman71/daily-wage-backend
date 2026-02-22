@@ -16,9 +16,16 @@ const useragent = require('express-useragent');
 
 const authRouter = require('./routes/authRoute');
 const userRouter = require('./routes/userRoute');
+const chatRouter = require('./routes/chatRoute');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorMiddleware = require('./middleware/error-handler');
 const { authenticateUser, authorizePermissions } = require('./middleware/authentication');
+
+
+// Socket imports
+const configureSocket = require('./socket/socketConfig');
+const { socketHandlers } = require('./socket/socketHandlers');
+const { getOnlineUsers } = require('./socket/socketMiddleware');
 
 // Add this line to parse JSON request bodies
 app.use(express.json());
@@ -28,12 +35,20 @@ app.use(express.static('public'));
 //all api group routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/chat', chatRouter);
 // middleware
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 // Create an HTTP server using the Express app
 const server = http.createServer(app);
+
+
+// Configure Socket.IO
+const io = configureSocket(server);
+
+// Initialize socket handlers
+socketHandlers(io);
 
 //get port number from env
 const port = process.env.PORT || 3004;
